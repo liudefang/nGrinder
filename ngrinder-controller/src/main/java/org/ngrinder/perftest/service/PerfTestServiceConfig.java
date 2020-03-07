@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
@@ -9,7 +9,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  */
 package org.ngrinder.perftest.service;
 
@@ -49,10 +49,14 @@ public class PerfTestServiceConfig implements ApplicationContextAware {
 	 */
 	@Bean(name = "perfTestService")
 	public PerfTestService perfTestService() {
-		return applicationContext.getAutowireCapableBeanFactory().createBean(
-				config.isClustered() ? ClusteredPerfTestService.class : PerfTestService.class);
+		if (config.isClustered()) {
+			return applicationContext.getAutowireCapableBeanFactory().createBean(ClusteredPerfTestService.class);
+		} else {
+			return applicationContext.getAutowireCapableBeanFactory().createBean(PerfTestService.class);
+		}
+//    return applicationContext.getAutowireCapableBeanFactory().createBean(
+//          config.isClustered() ? ClusteredPerfTestService.class : PerfTestService.class);
 	}
-
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
