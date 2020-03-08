@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
@@ -9,7 +9,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * limitations under the License.
  */
 package org.ngrinder.model;
 
@@ -313,6 +313,50 @@ public class PerfTest extends BaseModel<PerfTest> {
 	@Cloneable
 	@Column(name = "param")
 	private String param;
+
+	/**
+	 * 新增字段，TPS标准差，TPS波动率，最小/大RT，RT 25/50/75/80/85/90/95/99百分位数
+	 *
+	 */
+	@Expose
+	@Column(name = "tpsStd")
+	private Double tpsStd;
+
+	@Expose
+	@Column(name = "tpsVix")
+	private Double tpsVix;
+
+
+	@Expose
+	@Column(name = "minRT")
+	private Double minRT;
+
+
+	@Expose
+	@Column(name = "fiftyMeanTime")
+	private Double fiftyMeanTime;
+
+
+	@Expose
+	@Column(name = "eightyMeanTime")
+	private Double eightyMeanTime;
+
+
+	@Expose
+	@Column(name = "ninetyMeanTime")
+	private Double ninetyMeanTime;
+
+	@Expose
+	@Column(name = "ninetyFiveMeanTime")
+	private Double ninetyFiveMeanTime;
+
+	@Expose
+	@Column(name = "ninetyNineMeanTime")
+	private Double ninetyNineMeanTime;
+
+	@Expose
+	@Column(name = "maxRT")
+	private Double maxRT;
 
 	@PrePersist
 	@PreUpdate
@@ -651,6 +695,82 @@ public class PerfTest extends BaseModel<PerfTest> {
 
 	public void setDistributionPath(String distributionPath) {
 		this.distributionPath = distributionPath;
+	}
+
+	public Double getTpsStd() {
+		return  tpsStd;
+	}
+
+	public void setTpsStd(Double tpsStd){
+		this.tpsStd = tpsStd;
+	}
+
+	public Double getTpsVix() {
+		return tpsVix;
+	}
+
+	public void setTpsVix(Double tpsVix) {
+		this.tpsVix = tpsVix;
+	}
+
+	public Double getMinRT() {
+		return minRT;
+	}
+
+	public  void setMinRT(Double minRT){
+		this.minRT = minRT;
+	}
+
+
+
+	public Double getFiftyMeanTime() {
+		return fiftyMeanTime;
+	}
+
+	public  void setFiftyMeanTime(Double fiftyMeanTime){
+		this.fiftyMeanTime = fiftyMeanTime;
+	}
+
+
+
+	public Double getEightyMeanTime() {
+		return eightyMeanTime;
+	}
+
+	public  void setEightyMeanTime(Double eightyMeanTime){
+		this.eightyMeanTime = eightyMeanTime;
+	}
+
+
+	public Double getNinetyMeanTime() {
+		return ninetyMeanTime;
+	}
+
+	public  void setNinetyMeanTime(Double ninetyMeanTime){
+		this.ninetyMeanTime = ninetyMeanTime;
+	}
+
+	public Double getNinetyFiveMeanTime() {
+		return ninetyFiveMeanTime;
+	}
+
+	public  void setNinetyFiveMeanTime(Double ninetyFiveMeanTime){
+		this.ninetyFiveMeanTime = ninetyFiveMeanTime;
+	}
+
+	public Double getNinetyNineMeanTime() {
+		return ninetyNineMeanTime;
+	}
+
+	public  void setNinetyNineMeanTime(Double ninetyNineMeanTime){
+		this.ninetyNineMeanTime = ninetyNineMeanTime;
+	}
+	public Double getMaxRT() {
+		return maxRT;
+	}
+
+	public  void setMaxRT(Double maxRT){
+		this.maxRT = maxRT;
 	}
 
 	/**

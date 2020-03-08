@@ -44,6 +44,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.mutable.MutableBoolean;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.ngrinder.common.exception.NGrinderRuntimeException;
 import org.ngrinder.common.util.DateUtils;
 import org.ngrinder.common.util.ReflectionUtils;
@@ -61,6 +64,7 @@ import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.ngrinder.common.util.CollectionUtils.*;
 import static org.ngrinder.common.util.ExceptionUtils.processException;
@@ -541,7 +545,7 @@ public class SingleConsole extends AbstractSingleConsole implements Listener, Sa
 
 	/*
      * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.grinder.ISingleConsole2#getStatisticsIndexMap()
 	 */
 	public StatisticsIndexMap getStatisticsIndexMap() {
@@ -820,11 +824,18 @@ public class SingleConsole extends AbstractSingleConsole implements Listener, Sa
 	public static final Set<String> INTERESTING_STATISTICS = Sets.newHashSet("Tests", "Errors", "TPS",
 			"Response_bytes_per_second", "Mean_time_to_first_byte", "Peak_TPS", "Mean_Test_Time_(ms)", "User_defined");
 
+	// tps列表
+	List<Double> tps = new CopyOnWriteArrayList<Double>();
+
+	// rt 列表
+	List<Double> meanTestTime = new CopyOnWriteArrayList<Double>();
+
 	/**
-	 * Build up statistics for current sampling.
-	 *
-	 * @param accumulatedStatistics intervalStatistics
-	 * @param intervalStatistics    accumulatedStatistics
+	 * 每次调用一次Build up statistics for current sampling
+	 * @param accumulatedStatistics
+	 *            intervalStatistics
+	 * @param intervalStatistics
+	 *            accumulatedStatistics
 	 */
 	protected void updateStatistics(StatisticsSet intervalStatistics, StatisticsSet accumulatedStatistics) {
 		Map<String, Object> result = newHashMap();
@@ -864,6 +875,15 @@ public class SingleConsole extends AbstractSingleConsole implements Listener, Sa
 			}
 		}
 
+		LOGGER.debug("start get plug data");
+		// 获取tps，rt集合
+		for (Entry<String, StatisticExpression> each : getExpressionEntrySet()) {
+			if ("TPS".equals(each.getKey())) {
+				tps.add((Double) getRealDoubleValue(each.getValue().getDoubleValue(intervalStatistics)));
+			}else if("Mean_Test_Time_(ms)".equals(each.getKey())) {
+				meanTestTime.add((Double) getRealDoubleValue(each.getValue().getDoubleValue(intervalStatistics)));
+			}
+		}
 		result.put("totalStatistics", totalStatistics);
 		result.put("cumulativeStatistics", cumulativeStatistics);
 		result.put("lastSampleStatistics", lastSampleStatistics);
@@ -876,6 +896,80 @@ public class SingleConsole extends AbstractSingleConsole implements Listener, Sa
 		}
 		// Finally overwrite.. current one.
 		this.statisticData = result;
+	}
+
+	/**
+	 * 从updatateStatistics()累加数据，list:rt 和 tps，为成员变量
+	 * 再处理集合，放到statisticData中
+	 */
+	public void getPlusResult() {
+		LOGGER.debug("getPlusResult() tpslist {} rtlist is {}", tps.toString(), meanTestTime.toString());
+
+		int i = 0;
+		int j = 0;
+		// list 转换成数组，标准库使用数组作为参数
+		double[] tpsArray = new double[tps.size()];
+		for (double tpsNum : tps) {
+			tpsArray[i++] = tpsNum;
+		}
+
+		// list 转换成数组
+		double[] meanTestTimeArray = new double[meanTestTime.size()];
+		for (double meanTime : meanTestTime) {
+			meanTestTimeArray[j++] = meanTime;
+		}
+
+
+		// tps 标准差
+		double tpsStd = new StandardDeviation().evaluate(tpsArray);
+
+		// tps平均值
+		double tpsMean = new Mean().evaluate(tpsArray, 0, tpsArray.length);
+
+		// tps 波动率=tps标准差/tps平均值
+		double tpsVix = 0;
+		if(0 !=tpsMean) {
+			tpsVix = tpsStd / tpsMean;
+		}
+
+		// meanTestTime百分位数
+		Percentile percentile = new Percentile();
+		// 先排序
+		Arrays.sort(meanTestTimeArray);
+		// meanTestTime最小值
+		double minMeanTime = meanTestTimeArray[0];
+		double fiftyMeanTime  = percentile.evaluate(meanTestTimeArray, 50);
+		double eightMeanTime = percentile.evaluate(meanTestTimeArray, 80);
+		double ninetyMeanTime = percentile.evaluate(meanTestTimeArray, 90);
+		double ninetyFiveMeanTime = percentile.evaluate(meanTestTimeArray, 95);
+		double ninetyNineMeanTime = percentile.evaluate(meanTestTimeArray, 99);
+
+		int length = meanTestTimeArray.length;
+		// meanTestTime 最高值
+		double maxMeanTime = meanTestTimeArray[length - 1];
+		//meanTestTime 平均值
+		// double TimeMean = new Mean().evaluate(meanTestTimeArray, 0,
+		// meanTestTimeArray.length);
+
+		LOGGER.debug("plug Statistics MinMeanTime {}  MaxMeanTime is {}",
+			minMeanTime, maxMeanTime);
+
+		// tps标准差，tps标准率，最小/最大RT，RT百分位数
+		Map<String, Object> plusStatistics = newHashMap();
+		plusStatistics.put("tpsStd", tpsStd);
+		plusStatistics.put("tpsVix", tpsVix);
+		plusStatistics.put("minMeanTime", minMeanTime);
+		plusStatistics.put("fiftyMeanTime ", fiftyMeanTime );
+		plusStatistics.put("eightMeanTime", eightMeanTime);
+		plusStatistics.put("ninetyMeanTime", ninetyMeanTime);
+		plusStatistics.put("ninetyFiveMeanTime", ninetyFiveMeanTime);
+		plusStatistics.put("ninetyNineMeanTime", ninetyNineMeanTime);
+		plusStatistics.put("maxMeanTime", maxMeanTime);
+
+		LOGGER.debug("SingleConsole plug Statistics map plusStatistics {}", plusStatistics);
+
+		this.statisticData.put("plusStatistics", plusStatistics);
+
 	}
 
 	/*
@@ -1186,6 +1280,7 @@ public class SingleConsole extends AbstractSingleConsole implements Listener, Sa
 	}
 
 	/**
+	 * 停止采样上架
 	 * Stop sampling.
 	 */
 	public void unregisterSampling() {
@@ -1196,6 +1291,9 @@ public class SingleConsole extends AbstractSingleConsole implements Listener, Sa
 		}
 		LOGGER.info("Sampling is stopped");
 		informTestSamplingEnd();
+
+		// 结束采样后，处理数据
+		getPlusResult();
 	}
 
 	private void informTestSamplingStart() {
@@ -1355,4 +1453,7 @@ public class SingleConsole extends AbstractSingleConsole implements Listener, Sa
 	public void setCsvSeparator(String csvSeparator){
 		this.cvsSeparator = csvSeparator;
 	}
+
+
+
 }

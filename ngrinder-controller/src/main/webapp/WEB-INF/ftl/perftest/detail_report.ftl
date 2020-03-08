@@ -142,6 +142,55 @@
 					<th><@spring.message "perfTest.report.errors"/></th>
 					<td>${test.errors!""}</td>
 				</tr>
+				<#-- 新增 错误率，TPS标准差，TPS波动率，最小RT, 最大RT, RT /50/80//90/95/99百分位数 -->
+				<tr>
+					<th><@spring.message "perfTest.report.errorRate"/></th>
+					<td>${(test.errors /(test.tests + test.errors))!""}</td>
+				</tr>
+				<tr>
+					<th><@spring.message "perfTest.report.tpsStd"/></th>
+					<td>${test.tpsStd!""}</td>
+				</tr>
+				<tr>
+					<th><@spring.message "perfTest.report.tpsVix"/></th>
+					<td>${test.tpsVix!""}</td>
+				</tr>
+				<tr>
+					<th><@spring.message "perfTest.report.minRT"/></th>
+					<td>${test.minRT!""}&nbsp;&nbsp; <code>ms</code></td>
+				</tr>
+				<tr>
+					<th><@spring.message "perfTest.report.FiftyMeanTime"/></th>
+					<td>${test.fiftyMeanTime!""}&nbsp;&nbsp; <code>ms</code></td>
+				</tr>
+
+				<tr>
+					<th><@spring.message "perfTest.report.EightyMeanTime"/></th>
+					<td>${test.eightyMeanTime!""}&nbsp;&nbsp; <code>ms</code></td>
+				</tr>
+				</tr>
+
+				</tr>
+				<tr>
+					<th><@spring.message "perfTest.report.NinetyMeanTime"/></th>
+					<td>${test.ninetyMeanTime!""}&nbsp;&nbsp; <code>ms</code></td>
+				</tr>
+				</tr>
+				<tr>
+					<th><@spring.message "perfTest.report.NinetyFiveMeanTime"/></th>
+					<td>${test.ninetyFiveMeanTime!""}&nbsp;&nbsp; <code>ms</code></td>
+				</tr>
+				</tr>
+				<tr>
+					<th><@spring.message "perfTest.report.NinetyNineMeanTime"/></th>
+					<td>${test.ninetyNineMeanTime!""}&nbsp;&nbsp; <code>ms</code></td>
+				</tr>
+				</tr>
+				<tr>
+					<th><@spring.message "perfTest.report.maxRT"/></th>
+					<td>${test.maxRT!""}&nbsp;&nbsp; <code>ms</code></td>
+				</tr>
+
 			</table>
 
 			<div class="well" style="max-width: 340px; padding: 8px 0;">
