@@ -32,11 +32,11 @@ class LoginPlay {
     public static GTest test
     public static HTTPRequest request
     public static NVPair[] headers = []
-    public static String url = "http://192.168.226.128:8080/mobile/api/user/login"
+    public static String url = "http://192.168.226.147:8080/app/mobile/api/user/login"
     public static String body = "{\"mobile\": \"15800000002\", \"password\": \"123456\"}"
     public static Cookie[] cookies = []
     public static String token
-    public static String url_list = "http://192.168.226.128:8080/mobile/api/order/getorders"
+    public static String url_list = "http://192.168.226.147:8080/app/mobile/api/order/getorders"
     // 定义 NVPair 数组 params ，用于存放请求参数数据
     public static NVPair[] params = []
 

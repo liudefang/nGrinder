@@ -37,7 +37,7 @@ class LoginPost {
     public static GTest test
     public static HTTPRequest request
     public static NVPair[] headers = []
-    public static String url = "http://192.168.226.128:8080/mobile/api/user/login"
+    public static String url = "http://192.168.226.147:8080/app/mobile/api/user/login"
     public static String mobile
     public static String body
     public static Cookie[] cookies = []

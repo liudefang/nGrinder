@@ -88,7 +88,7 @@ class Get_type {
     @Test
     public void test(){
         // 发送GET请求
-        HTTPResponse result = request.GET("http://192.168.226.128:8080/mobile/api/goods/gettypes?type=1", params)
+        HTTPResponse result = request.GET("http://192.168.226.147:8080/app/mobile/api/goods/gettypes?type=1", params)
         //输出请求的返回结果信息
         grinder.logger.info(result.getText())
         if (result.statusCode == 301 || result.statusCode == 302) {
